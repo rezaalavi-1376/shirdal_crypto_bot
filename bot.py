@@ -78,3 +78,17 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "✅ Crypto bot is running!"
+
+# Run the Flask server in a separate thread
+if __name__ == '__main__':
+    from threading import Thread
+    Thread(target=main).start()  # your bot starts here
+    app.run(host='0.0.0.0', port=10000)
