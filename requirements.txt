@@ -1,2 +1,2 @@
 python_telegram_bot==13.15
-request
+requests
