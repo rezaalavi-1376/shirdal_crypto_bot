@@ -2,7 +2,10 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 import requests
 
-TOKEN =8420874955:AAGnNlb-uFUGEAQiUdlhh95QmywWpQ_aoMA
+import os
+
+TOKEN = os.environ['TOKEN']
+
 
 def get_price(symbol):
     url = f'https://api.binance.com/api/v3/ticker/price?symbol={symbol}USDT'
