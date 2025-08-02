@@ -2,12 +2,13 @@ import os
 import requests
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from datetime import datetime
+from datetime import datetime, time
 
-# دریافت توکن ربات از متغیر محیطی
+# ENV config
 TOKEN = os.environ['TOKEN']
+CHAT_ID = os.environ.get('CHAT_ID')  # وارد کردن در تنظیمات Render
 
-# تبدیل symbol به id در CoinGecko (مثل BTC → bitcoin)
+# Get CoinGecko coin ID from symbol
 def get_coin_id(symbol):
     url = "https://api.coingecko.com/api/v3/coins/list"
     response = requests.get(url)
@@ -18,7 +19,7 @@ def get_coin_id(symbol):
                 return coin["id"]
     return None
 
-# دریافت قیمت ارز
+# Get price from CoinGecko
 def get_price(symbol):
     coin_id = get_coin_id(symbol)
     if coin_id:
@@ -29,30 +30,48 @@ def get_price(symbol):
             return data.get(coin_id, {}).get("usd", None)
     return None
 
-# شروع ربات
+# Start command
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text("✅ ربات فعال است.\nبرای دریافت قیمت بنویس: /btc یا /eth یا /هرارزی")
+    update.message.reply_text("✅ Bot is running. Use /btc, /eth, or any other coin symbol to get price.")
 
-# پاسخ به هر پیام که با / شروع شود (مثلاً /btc)
+# Handle all coin commands
 def handle_command(update: Update, context: CallbackContext):
     symbol = update.message.text[1:].strip().upper()
     price = get_price(symbol)
     if price:
-        update.message.reply_text(f"💰 قیمت {symbol.upper()} الان: ${price}")
+        update.message.reply_text(f"💰 {symbol.upper()} price: ${price}")
     else:
-        update.message.reply_text("❌ متأسفم! این ارز پیدا نشد یا توسط CoinGecko پشتیبانی نمی‌شود.")
+        update.message.reply_text("❌ Coin not found or unsupported.")
 
-# اجرای ربات
+# Daily report of selected coins
+def send_daily_prices(context: CallbackContext):
+    important_coins = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP']
+    message = f"📊 Daily Market Report - {datetime.utcnow().strftime('%Y-%m-%d')}\n\n"
+    for symbol in important_coins:
+        price = get_price(symbol)
+        if price:
+            message += f"{symbol}: ${price}\n"
+        else:
+            message += f"{symbol}: N/A\n"
+    if CHAT_ID:
+        context.bot.send_message(chat_id=CHAT_ID, text=message)
+
+# Main function
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
+    # Commands and messages
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.command, handle_command))  # همه دستورات مثل /btc /sol و...
+    dp.add_handler(MessageHandler(Filters.command, handle_command))
 
+    # Daily job at 10:00 UTC
+    job = updater.job_queue
+    job.run_daily(send_daily_prices, time=time(10, 0))
+
+    # Start polling
     updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
     main()
-
