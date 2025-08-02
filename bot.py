@@ -6,7 +6,6 @@ from datetime import datetime, time
 
 # ENV config
 TOKEN = os.environ['TOKEN']
-CHAT_ID = os.environ.get('CHAT_ID')  # وارد کردن در تنظیمات Render
 
 # Get CoinGecko coin ID from symbol
 def get_coin_id(symbol):
