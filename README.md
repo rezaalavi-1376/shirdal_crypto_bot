@@ -1,10 +1,8 @@
-# shirdal_crypto_bot
-shirdalcrypto ربات تلگرام رمز ارز
-# Shirdal Crypto Bot 🦎💰
+# Shirdal Crypto Bot 
 
 A simple Telegram bot for real-time crypto prices using CoinGecko API. Deployed on [Render.com](https://render.com), kept alive with Flask.
 
-## 🚀 Setup
+##  Setup
 
 1. Clone the repo:
 https://github.com/rezaalavi-1376/shirdal_crypto_bot
